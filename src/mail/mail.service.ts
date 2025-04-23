@@ -73,8 +73,10 @@ export class MailService {
       from: process.env.MAIL_FROM,
       to: mailAdress,
       subject: 'test',
-      html: `<p>Hello! ${name} Please access this URL to sign in our bulletin borad!</p>
-      <br><a href="http://localhost:3000/signup/mailauth?name=${name}&email=${mailAdress}">アカウント確認</a>
+      html:
+        `<p>Hello! ${name} Please access this URL to sign in our bulletin borad!</p>
+      <br><a href=${process.env.FRONTEND_DOMAIN}` +
+        `/signup/mailauth?name=${name}&email=${mailAdress}>アカウント確認</a>
       <br><div>email: ${mailAdress}</div>
       <br><div>One Time Password: ${otp}</div>`,
     };
@@ -85,6 +87,14 @@ export class MailService {
     const expire = new Date();
     expire.setDate(expire.getDate() + 1);
 
+    // ワンタイムパスワード発行履歴があるか
+    const pre_registe = await this.registeRepository.findOne({
+      where: {
+        name: Equal(name),
+        email: Equal(mailAdress),
+      },
+    });
+
     // 登録情報を格納
     const register = {
       name: name,
@@ -94,7 +104,17 @@ export class MailService {
       created_at: new Date(),
     };
 
-    await this.registeRepository.save(register);
+    // 発行履歴があるなら上書き保存
+    if (pre_registe) {
+      await this.registeRepository
+        .createQueryBuilder('register_rep')
+        .update(Register)
+        .set(register)
+        .where('name = :name', { name })
+        .execute();
+    } else {
+      await this.registeRepository.save(register);
+    }
 
     return true;
   }
