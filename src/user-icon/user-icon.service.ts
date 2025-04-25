@@ -32,8 +32,8 @@ export class UserIconService {
     },
   });
   state = uuidv4();
+
   async upload(token: string, id: number, file: Express.Multer.File) {
-    console.log(token, id);
     // ログイン済みかチェック
     const now = new Date();
     const auth = await this.authRepository.findOne({
@@ -57,13 +57,14 @@ export class UserIconService {
       }),
     );
 
-    const url = await getSignedUrl(
-      this.s3,
-      new GetObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
-        Key: key,
-      }),
-    );
+    // ユーザーアイコンのurl取得をgetメソッドに変更
+    // const url = await getSignedUrl(
+    //   this.s3,
+    //   new GetObjectCommand({
+    //     Bucket: process.env.AWS_S3_BUCKET_NAME,
+    //     Key: key,
+    //   }),
+    // );
 
     // dbのアイコンを変更
     const user = await this.userRepository.findOne({
@@ -74,8 +75,46 @@ export class UserIconService {
     if (!user) {
       throw new NotFoundException();
     }
-    user.icon_url = url;
+    user.icon_url = key;
     await this.userRepository.save(user);
+
+    return key;
+  }
+
+  async getIconURL(token: string, id: number) {
+    console.log(token, id);
+    // ログイン済みかチェック
+    const now = new Date();
+    const auth = await this.authRepository.findOne({
+      where: {
+        token: Equal(token),
+        expire_at: MoreThan(now),
+      },
+    });
+    if (!auth) {
+      throw new ForbiddenException();
+    }
+
+    const user = await this.userRepository.findOne({
+      where: {
+        id: Equal(id),
+      },
+    });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    const key = user.icon_url;
+    console.log(key);
+
+    const url = await getSignedUrl(
+      this.s3,
+      new GetObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: key,
+      }),
+    );
+
+    console.log(url);
 
     return url;
   }

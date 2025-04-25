@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Param,
   Post,
   Query,
@@ -21,6 +22,12 @@ export class UserIconController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     const imageUrl = await this.userIconService.upload(token, id, file);
-    return { imageUrl };
+    return imageUrl;
+  }
+
+  @Get(':id')
+  async getIconURL(@Param('id') id: number, @Query('token') token: string) {
+    const imageUrl = await this.userIconService.getIconURL(token, id);
+    return imageUrl;
   }
 }
