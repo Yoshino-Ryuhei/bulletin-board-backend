@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
 import { MailService } from './mail.service';
 
 @Controller('mail')
@@ -14,11 +14,19 @@ export class MailController {
     return await this.mailService.registerUser(name, email, otp);
   }
 
-  @Post('send')
+  @Post('send/registration')
   async sendEmail(
     @Body('name') name: string,
     @Body('email') mailAdress: string,
   ) {
-    return await this.mailService.sendTestMail(name, mailAdress);
+    return await this.mailService.sendRegisteMail(name, mailAdress);
+  }
+
+  @Put('send/resetpass')
+  async sendResetpassEmail(
+    @Body('name') name: string,
+    @Body('email') mailAdress: string,
+  ) {
+    return await this.mailService.sendResetpassMail(name, mailAdress);
   }
 }

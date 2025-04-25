@@ -6,10 +6,11 @@ import { join } from 'path';
 import { MailController } from './mail.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Register } from 'src/entities/register';
+import { User } from 'src/entities/user';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Register]),
+    TypeOrmModule.forFeature([Register, User]),
     MailerModule.forRoot({
       // SMPTの設定
       transport: {

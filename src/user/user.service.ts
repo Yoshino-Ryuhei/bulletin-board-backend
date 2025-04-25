@@ -127,4 +127,37 @@ export class UserService {
 
     return record;
   }
+
+  async resetPasswordUser(name: string, email: string, password: string) {
+    // ユーザーを見つける
+    const user = await this.userRepository.findOne({
+      where: {
+        name: Equal(name),
+        email: Equal(email),
+      },
+    });
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    const newHash = createHash('md5').update(password).digest('hex');
+    const newPassUser = {
+      id: user.id,
+      name: name,
+      hash: newHash,
+      email: email,
+      icon_url: user.icon_url,
+      created_at: user.created_at,
+      updated_at: new Date(),
+    };
+
+    await this.userRepository
+      .createQueryBuilder('user_rep')
+      .update(User)
+      .set(newPassUser)
+      .where('id = :id', { id: user.id })
+      .execute();
+
+    return true;
+  }
 }

@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -36,5 +37,14 @@ export class UserController {
     @Query('token') token: string,
   ) {
     return await this.userService.updateUser(name, email, password, id, token);
+  }
+
+  @Put()
+  async resetPasswordUser(
+    @Body('name') name: string,
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ) {
+    return await this.userService.resetPasswordUser(name, email, password);
   }
 }
