@@ -7,7 +7,6 @@ import { Equal, MoreThan, Repository } from 'typeorm';
 import { User } from 'src/entities/user';
 
 const secretKey = Buffer.from(String(process.env.OTP_SECRET_KEY));
-let counter = new Date().getSeconds();
 
 @Injectable()
 export class MailService {
@@ -18,13 +17,12 @@ export class MailService {
     private userRepository: Repository<User>,
   ) {}
 
-  async registerUser(name: string, email: string, otp: string) {
+  async registerUser(token: string, otp: string) {
     const date = new Date();
 
     const ret = await this.registeRepository.findOne({
       where: {
-        name: Equal(name),
-        email: Equal(email),
+        token: Equal(token),
         otp: Equal(otp),
         expire_at: MoreThan(date),
       },
@@ -38,6 +36,8 @@ export class MailService {
 
   async sendRegisteMail(name: string, mailAdress: string) {
     // ワンタイムパスワードの作成
+    let counter = new Date().getSeconds();
+
     const counterBuffer = Buffer.alloc(8);
     counterBuffer.writeBigUInt64BE(BigInt(counter));
 
@@ -63,6 +63,20 @@ export class MailService {
         ? -date.getSeconds()
         : date.getSeconds() * date.getMilliseconds();
 
+    // 有効期限
+    const expire = new Date();
+    expire.setDate(expire.getDate() + 1);
+
+    // ワンタイムパスワード発行履歴があるか
+    const pre_registe = await this.registeRepository.findOne({
+      where: {
+        name: Equal(name),
+        email: Equal(mailAdress),
+      },
+    });
+
+    const token = crypto.randomUUID();
+
     // メール送信
     const transporter = nodemailer.createTransport({
       host: process.env.MAIL_HOST,
@@ -78,30 +92,19 @@ export class MailService {
       subject: 'One time password',
       html:
         `<p>Hello! ${name} Please access this URL to sign in our bulletin borad!</p>
-      <br><a href=${process.env.FRONTEND_DOMAIN}` +
-        `/signup/mailauth?name=${name}&email=${mailAdress}>アカウント確認</a>
-      <br><div>email: ${mailAdress}</div>
-      <br><div>One Time Password: ${otp}</div>`,
+          <br><a href=${process.env.FRONTEND_DOMAIN}` +
+        `/signup/mailauth?token=${token}>アカウント確認</a>
+          <br><div>email: ${mailAdress}</div>
+          <br><div>One Time Password: ${otp}</div>`,
     };
 
     transporter.sendMail(mailOptions);
-
-    // 有効期限
-    const expire = new Date();
-    expire.setDate(expire.getDate() + 1);
-
-    // ワンタイムパスワード発行履歴があるか
-    const pre_registe = await this.registeRepository.findOne({
-      where: {
-        name: Equal(name),
-        email: Equal(mailAdress),
-      },
-    });
 
     // 登録情報を格納
     const register = {
       name: name,
       email: mailAdress,
+      token: token,
       otp: otp,
       expire_at: expire,
       created_at: new Date(),

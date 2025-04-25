@@ -19,6 +19,9 @@ export class Register {
   email: string;
 
   @Column('varchar')
+  token: string;
+
+  @Column('varchar')
   otp: string;
 
   @Column()

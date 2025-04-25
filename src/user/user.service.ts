@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import { Auth } from '../entities/auth';
 import { User } from '../entities/user';
 import { Equal, MoreThan, Not, Repository } from 'typeorm';
+import { Register } from 'src/entities/register';
 
 @Injectable()
 export class UserService {
@@ -17,6 +18,8 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectRepository(Auth)
     private authRepository: Repository<Auth>,
+    @InjectRepository(Register)
+    private registerRepository: Repository<Register>,
   ) {}
 
   async getUser(token: string, id: number) {
@@ -43,12 +46,23 @@ export class UserService {
     return user;
   }
 
-  async createUser(name: string, email: string, password: string) {
+  async createUser(token: string, password: string) {
+    // token認証
+    const register = await this.registerRepository.findOne({
+      where: {
+        token: Equal(token),
+      },
+    });
+
+    if (!register) {
+      throw new NotFoundException();
+    }
+
     const hash = createHash('md5').update(password).digest('hex');
     const created_at = new Date();
     const record = {
-      name: name,
-      email: email,
+      name: register.name,
+      email: register.email,
       hash: hash,
       created_at: created_at,
     };

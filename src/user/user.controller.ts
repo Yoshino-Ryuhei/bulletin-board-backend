@@ -16,11 +16,10 @@ export class UserController {
 
   @Post()
   createUser(
-    @Body('name') name: string,
-    @Body('email') email: string,
+    @Query('token') token: string,
     @Body('password') password: string,
   ) {
-    return this.userService.createUser(name, email, password);
+    return this.userService.createUser(token, password);
   }
 
   @Get(':id')

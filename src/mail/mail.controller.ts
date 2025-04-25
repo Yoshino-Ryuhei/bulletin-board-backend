@@ -6,12 +6,8 @@ export class MailController {
   constructor(private readonly mailService: MailService) {}
 
   @Get('registration')
-  async registerUser(
-    @Query('name') name: string,
-    @Query('email') email: string,
-    @Query('otp') otp: string,
-  ) {
-    return await this.mailService.registerUser(name, email, otp);
+  async registerUser(@Query('token') token: string, @Query('otp') otp: string) {
+    return await this.mailService.registerUser(token, otp);
   }
 
   @Post('send/registration')
