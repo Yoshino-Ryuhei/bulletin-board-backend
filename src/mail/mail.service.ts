@@ -6,7 +6,7 @@ import { Register } from 'src/entities/register';
 import { Equal, MoreThan, Repository } from 'typeorm';
 import { User } from 'src/entities/user';
 
-const secretKey = Buffer.from('19386242917565235250');
+const secretKey = Buffer.from(String(process.env.OTP_SECRET_KEY));
 let counter = new Date().getSeconds();
 
 @Injectable()
