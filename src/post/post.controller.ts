@@ -1,33 +1,49 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { PostService } from './post.service';
+import { AuthGuard } from '@nestjs/passport';
+import { Request as ExpressRequest } from 'express';
+// import { JwtPayload } from 'src/types/jwtpayload';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   async createPost(
     @Body('message') message: string,
-    @Query('token') token: string,
+    @Request() req: ExpressRequest & { user: { id: number; username: string } },
   ) {
-    return await this.postService.createPost(message, token);
+    const payload = req.user;
+    return await this.postService.createPost(message, payload);
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'))
   async getList(
-    @Query('token') token: string,
     @Query('start') start: number,
     @Query('records') records: number,
     @Query('word') word: string,
   ) {
-    return await this.postService.getList(token, start, records, word);
+    return await this.postService.getList(start, records, word);
   }
 
   @Delete()
+  @UseGuards(AuthGuard('jwt'))
   async deletepost(
-    @Body('message') message: string,
-    @Query('token') token: string,
+    @Query('message') message: string,
+    @Request() req: ExpressRequest & { user: { id: number; username: string } },
   ) {
-    return await this.postService.deletePost(message, token);
+    const payload = req.user;
+    return await this.postService.deletePost(message, payload);
   }
 }

@@ -1,14 +1,12 @@
 import {
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash } from 'crypto';
-import { Auth } from '../entities/auth';
 import { User } from '../entities/user';
-import { Equal, MoreThan, Not, Repository } from 'typeorm';
+import { Equal, Not, Repository } from 'typeorm';
 import { Register } from 'src/entities/register';
 
 @Injectable()
@@ -16,25 +14,11 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(Auth)
-    private authRepository: Repository<Auth>,
     @InjectRepository(Register)
     private registerRepository: Repository<Register>,
   ) {}
 
-  async getUser(token: string, id: number) {
-    // ログイン済みかチェック
-    const now = new Date();
-    const auth = await this.authRepository.findOne({
-      where: {
-        token: Equal(token),
-        expire_at: MoreThan(now),
-      },
-    });
-    if (!auth) {
-      throw new ForbiddenException();
-    }
-
+  async getUser(id: number) {
     const user = await this.userRepository.findOne({
       where: {
         id: Equal(id),
@@ -81,25 +65,7 @@ export class UserService {
     return record;
   }
 
-  async updateUser(
-    name: string,
-    email: string,
-    password: string,
-    id: number,
-    token: string,
-  ) {
-    // ログイン済みかチェック
-    const now = new Date();
-    const auth = await this.authRepository.findOne({
-      where: {
-        token: Equal(token),
-        expire_at: MoreThan(now),
-      },
-    });
-    if (!auth) {
-      throw new ForbiddenException();
-    }
-
+  async updateUser(name: string, email: string, password: string, id: number) {
     // ユーザーを見つける
     const user = await this.userRepository.findOne({
       where: {

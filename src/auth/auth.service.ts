@@ -4,6 +4,7 @@ import { Auth } from 'src/entities/auth';
 import { User } from 'src/entities/user';
 import { Equal, Repository } from 'typeorm';
 import * as crypto from 'crypto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,8 @@ export class AuthService {
 
     @InjectRepository(Auth)
     private authRepository: Repository<Auth>,
+
+    private JwtService: JwtService,
   ) {}
 
   async getAuth(name: string, password: string) {
@@ -46,14 +49,16 @@ export class AuthService {
         user_id: Equal(user.id),
       },
     });
+    const payload = { id: user.id, username: user.name };
     if (auth) {
       // 更新
       auth.expire_at = expire;
       await this.authRepository.save(auth);
-      ret.token = auth.token;
+      ret.token = await this.JwtService.signAsync(payload);
     } else {
       // 挿入
-      const token = crypto.randomUUID();
+      // Jwt生成
+      const token = await this.JwtService.signAsync(payload);
       const record = {
         user_id: user.id,
         token: token,
