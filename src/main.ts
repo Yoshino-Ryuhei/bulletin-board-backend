@@ -11,6 +11,11 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   };
   app.use(cors(corsOption));
+  app.use((req, res, next) => {
+    res.setHeader('X-Frame-Options', 'DENY');
+    next();
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

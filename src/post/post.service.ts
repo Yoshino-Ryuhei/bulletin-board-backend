@@ -49,14 +49,13 @@ export class PostService {
     return records;
   }
 
-  async deletePost(message: string, payload: JwtPayload) {
+  async deletePost(msg_id: number, payload: JwtPayload) {
     const deletePost = await this.microPostsRepository.findOne({
       where: {
+        id: Equal(msg_id),
         user_id: Equal(payload.id),
-        content: Equal(message),
       },
     });
-
     if (!deletePost) {
       throw new NotFoundException();
     }

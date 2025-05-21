@@ -40,10 +40,10 @@ export class PostController {
   @Delete()
   @UseGuards(AuthGuard('jwt'))
   async deletepost(
-    @Query('message') message: string,
+    @Query('id') id: number,
     @Request() req: ExpressRequest & { user: { id: number; username: string } },
   ) {
     const payload = req.user;
-    return await this.postService.deletePost(message, payload);
+    return await this.postService.deletePost(id, payload);
   }
 }

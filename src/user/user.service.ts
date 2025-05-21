@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash } from 'crypto';
@@ -108,7 +109,16 @@ export class UserService {
     return record;
   }
 
-  async resetPasswordUser(name: string, email: string, password: string) {
+  async resetPasswordUser(
+    name: string,
+    email: string,
+    password: string,
+    hidden_token: string,
+  ) {
+    if (hidden_token !== process.env.RESET_PASS_TOKEN) {
+      throw new UnauthorizedException();
+    }
+
     // ユーザーを見つける
     const user = await this.userRepository.findOne({
       where: {

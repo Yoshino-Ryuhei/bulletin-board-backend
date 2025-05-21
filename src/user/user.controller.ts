@@ -49,7 +49,13 @@ export class UserController {
     @Body('name') name: string,
     @Body('email') email: string,
     @Body('password') password: string,
+    @Body('hidden_token') hidden_token: string,
   ) {
-    return await this.userService.resetPasswordUser(name, email, password);
+    return await this.userService.resetPasswordUser(
+      name,
+      email,
+      password,
+      hidden_token,
+    );
   }
 }
