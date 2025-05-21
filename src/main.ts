@@ -12,7 +12,7 @@ async function bootstrap() {
   };
   app.use(cors(corsOption));
   app.use((req, res, next) => {
-    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     next();
   });
 
