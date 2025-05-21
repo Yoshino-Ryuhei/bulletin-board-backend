@@ -1,4 +1,4 @@
-function escapeHTML(str: string): string {
+export function escapeHTML(str: string): string {
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -6,5 +6,3 @@ function escapeHTML(str: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
-
-export { escapeHTML };
