@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import * as cors from 'cors';
 
 // import { createServer } from 'http';
-import * as express from 'express';
+// import * as express from 'express';
 import { Server } from 'socket.io';
 
 async function bootstrap() {
@@ -20,15 +20,13 @@ async function bootstrap() {
     next();
   });
 
-  await app.listen(process.env.PORT ?? 3000);
-
   // websocket
-  const PORT = process.env.WEBSOCKET_PORT || 3001;
-  const INDEX = '/index.html';
-  const server = express()
-    .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-    .listen(PORT, () => console.log(`Listening on ${PORT}`));
-  const io = new Server(server, {
+  // const PORT = process.env.WEBSOCKET_PORT || 3001;
+  // const INDEX = '/index.html';
+  // const server = express()
+  //   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+  //   .listen(PORT, () => console.log(`Listening on ${PORT}`));
+  const io = new Server(app.getHttpServer(), {
     cors: { origin: '*', methods: ['GET'] },
   });
 
@@ -38,6 +36,7 @@ async function bootstrap() {
     });
   });
 
-  server.listen(PORT, () => {});
+  // server.listen(PORT, () => {});
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
