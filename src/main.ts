@@ -2,7 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cors from 'cors';
 
-import { createServer } from 'http';
+// import { createServer } from 'http';
+import express from 'express';
 import { Server } from 'socket.io';
 
 async function bootstrap() {
@@ -22,8 +23,12 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
 
   // websocket
-  const httpServer = createServer();
-  const io = new Server(httpServer, {
+  const PORT = process.env.PORT || 3000;
+  const INDEX = '/index.html';
+  const server = express()
+    .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+    .listen(PORT, () => console.log(`Listening on ${PORT}`));
+  const io = new Server(server, {
     cors: { origin: '*', methods: ['GET'] },
   });
 
@@ -33,6 +38,6 @@ async function bootstrap() {
     });
   });
 
-  httpServer.listen(3001, () => {});
+  server.listen(PORT, () => {});
 }
 bootstrap();
