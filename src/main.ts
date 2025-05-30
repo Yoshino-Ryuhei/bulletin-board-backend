@@ -28,16 +28,11 @@ async function bootstrap() {
   });
 
   io.on('connection', (socket) => {
-    console.log('connect client');
-
     socket.on('new_post', (post) => {
       io.emit('new_post', post);
-      console.log(post);
     });
   });
 
-  httpServer.listen(3001, () => {
-    console.log('connect in 3001 port');
-  });
+  httpServer.listen(3001, () => {});
 }
 bootstrap();
