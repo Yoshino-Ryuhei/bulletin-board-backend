@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cors from 'cors';
 
+import { createServer } from 'http';
 import { Server } from 'socket.io';
 
 async function bootstrap() {
@@ -21,9 +22,9 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
 
   // websocket
-  const httpServer = app.getHttpServer();
+  const httpServer = createServer();
   const io = new Server(httpServer, {
-    cors: { origin: '*' },
+    cors: { origin: '*', methods: ['GET'] },
   });
 
   io.on('connection', (socket) => {
@@ -32,6 +33,6 @@ async function bootstrap() {
     });
   });
 
-  httpServer.listen(3001, '0,0,0,0', () => {});
+  httpServer.listen(3001, () => {});
 }
 bootstrap();
