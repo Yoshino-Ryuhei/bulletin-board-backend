@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import * as cors from 'cors';
 
 // import { createServer } from 'http';
-import express from 'express';
+import * as express from 'express';
 import { Server } from 'socket.io';
 
 async function bootstrap() {
