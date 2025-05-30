@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MicroPost } from 'src/entities/microposts';
 import { JwtPayload } from 'src/types/jwtpayload';
+// import { JwtPayload } from 'src/types/jwtpayload';
 import { Equal, Repository } from 'typeorm';
 
 @Injectable()
@@ -16,7 +17,7 @@ export class PostService {
       user_id: payload.id,
       content: message,
     };
-    await this.microPostsRepository.save(record);
+    return await this.microPostsRepository.save(record);
   }
 
   async getList(start: number = 0, nr_recodes: number = 1, word: string = '') {
