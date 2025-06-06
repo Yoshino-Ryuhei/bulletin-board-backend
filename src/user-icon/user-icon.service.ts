@@ -5,6 +5,7 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
+import * as sharp from 'sharp';
 import 'multer';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { User } from 'src/entities/user';
@@ -29,12 +30,16 @@ export class UserIconService {
 
   async upload(payload: JwtPayload, file: Express.Multer.File) {
     const key = `user-icons/${payload.id}/${this.state}}`;
+    const resizedFile = await sharp(file.buffer)
+      .resize({ width: 128, height: 128 })
+      .jpeg({ quality: 80 })
+      .toBuffer();
 
     await this.s3.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET_NAME,
         Key: key,
-        Body: file.buffer,
+        Body: resizedFile,
         ContentType: file.mimetype,
       }),
     );
