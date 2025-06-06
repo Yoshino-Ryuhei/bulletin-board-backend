@@ -64,6 +64,9 @@ export class UserIconService {
       throw new NotFoundException();
     }
     const key = user.icon_url;
+    if (!key) {
+      return;
+    }
 
     const url = await getSignedUrl(
       this.s3,
